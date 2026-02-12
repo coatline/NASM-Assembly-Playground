@@ -24,6 +24,7 @@ The goal is to demonstrate low-level concepts including:
 
 # 1. Install Required Tools
 
+This project builds 32-bit binaries. 
 On Ubuntu / WSL:
 
 ```bash
@@ -36,26 +37,21 @@ nasm -v
 ld -v
 ```
 
-This project builds 32-bit binaries. On a 64-bit system, ensure 32-bit libraries are installed:
-`sudo apt install libc6-dev-i386`
-
 ## Building a Program
 
 ### Manually:
-
-Assume the file is named p1.asm.
 
 Assemble:
 `nasm -f elf32 [FILE].asm -o [OUTPUT].o`
 
 Link:
-`ld -m elf_i386 [FILE].o -o p1`
+`ld -m elf_i386 [FILE].o -o [FILE]`
 
 Run:
-`./p1`
+`./[FILE]`
 
 Verify architecture:
-`file p1`
+`file [FILE]`
 The expected output should include:
 `ELF 32-bit LSB executable, Intel 80386`
 
@@ -84,13 +80,13 @@ Recommended method: WSL (Windows Subsystem for Linux)
 To debug with gdb:
 
 Install gdb:
-```
+```bash
 sudo apt install gdb
-gdb ./p1
+gdb ./[FILE]
 ```
 
 Inside gdb:
-```
+```bash
 break _start
 run
 info registers

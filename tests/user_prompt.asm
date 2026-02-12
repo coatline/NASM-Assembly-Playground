@@ -34,6 +34,7 @@ _start:
     mov edx, 16
     int 0x80
 
+    ; store the size of the received input
     mov esi, eax
 
     ; print prompt 2
