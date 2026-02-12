@@ -93,12 +93,3 @@ info registers
 ```
 
 This allows inspection of register values and execution flow.
-
-### Concepts Covered
-
-- Register manipulation
-- Memory addressing
-- Stack basics
-- Linux syscalls (`int 0x80`)
-- ASCII ↔ integer conversion
-- Basic control flow (loops, conditionals)

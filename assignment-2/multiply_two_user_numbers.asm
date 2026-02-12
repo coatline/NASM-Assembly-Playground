@@ -63,9 +63,9 @@ _start:
     mov ax, 0
     mov al, [input_buffer1]
     sub al, '0'
-    mov bl, [input_buffer2]
-    sub bl, '0'
-    imul bl
+
+    sub byte [input_buffer2], '0'
+    imul byte [input_buffer2]
     
     ; convert result to ASCII for printing
     add al, '0'
