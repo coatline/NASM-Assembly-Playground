@@ -1,6 +1,10 @@
 ; p1.asm - Add two single-digit numbers
 ; 32-bit Linux NASM
 
+SYS_WRITE equ 4
+SYS_READ  equ 3
+SYS_EXIT  equ 1
+
 section .data
     prompt1 db "Please enter a single digit number: ", 0
     prompt1_len equ $-prompt1
@@ -20,11 +24,6 @@ section .bss
 
 section .text
     global _start
-
-; Define syscall constants for readability
-SYS_WRITE equ 4
-SYS_READ  equ 3
-SYS_EXIT  equ 1
 
 _start:
     ; Prompt first number
@@ -90,9 +89,7 @@ _start:
     mov edx, 1
     int 0x80
 
-    ; ----------------------------
     ; Exit
-    ; ----------------------------
     mov eax, SYS_EXIT
     xor ebx, ebx
     int 0x80
