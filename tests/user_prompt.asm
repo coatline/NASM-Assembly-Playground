@@ -17,8 +17,6 @@ section .bss
 section .text
     global _start
 
-SYS_WRITE equ 4
-
 _start:
     ; print prompt 1
     mov eax, SYS_WRITE
