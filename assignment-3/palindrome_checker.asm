@@ -6,12 +6,12 @@ STDIN equ 0
 NL equ 10
 
 section .data
-    prompt db "Please enter a string:", NL
+    prompt db "Please enter a string:", 10
     prompt_len equ $ - prompt
-    msg_is_pal db "It is a palindrome", NL
-    msg_is_pal_len equ $ - msg_is_pal
-    msg_not_pal db "It is NOT a palindrome", NL
-    msg_not_pal_len equ $ - msg_not_pal
+    is_pal_msg db "It is a palindrome", 10
+    is_pal_len equ $ - is_pal_msg
+    not_pal_msg db "It is NOT a palindrome", 10
+    not_pal_len equ $ - not_pal_msg
 
 section .bss
     buffer resb 1024
@@ -20,67 +20,103 @@ section .text
     global _start
 
 _start:
-.main_loop:
-    ; Print the prompt
+
+main_loop:
     mov eax, SYS_WRITE
     mov ebx, STDOUT
     mov ecx, prompt
     mov edx, prompt_len
     int 0x80
 
-    ; Read the input
     mov eax, SYS_READ
     mov ebx, STDIN
     mov ecx, buffer
     mov edx, 1024
     int 0x80
 
-    ; does the value of buffer equal a new line? if so, exit_program
-    cmp byte [buffer], NL
-    je .exit_program
-
-    mov esi, eax    ; save the read length in esi
-    dec esi         ; subtract 1 to ignore the new line at the end
-
-    push esi        ; push 2nd argument length of buffer
-    push buffer     ; push 1st argument buffer address
-
+    ; If the input size is 1, it's just a new line, so we can quit
+    cmp eax, 1
+    jbe exit_program
+    
+    dec eax ; exclude the newline
+    push eax ; length
+    push buffer ; buffer
     call is_palindrome
+    add esp, 8 ; clean up stack (2 args * 4 bytes)
 
-    ; esp is a special register that always points to the top of the stack.
+    ; Check what we returned
+    cmp eax, 1
+    je print_is_pal
 
-.print_false:
+print_not_pal:
     mov eax, SYS_WRITE
     mov ebx, STDOUT
-    mov ecx, msg_not_pal
-    mov edx, msg_not_pal_len
+    mov ecx, not_pal_msg
+    mov edx, not_pal_len
     int 0x80
-    jmp .main_loop
+    jmp main_loop
 
-.exit_program:
-    mov eax, SYS_EXIT
+print_is_pal:
+    mov eax, SYS_WRITE
+    mov ebx, STDOUT
+    mov ecx, is_pal_msg
+    mov edx, is_pal_len
+    int 0x80
+    jmp main_loop
+
+exit_program:
+    mov eax, 1
     xor ebx, ebx
     int 0x80
 
+; int is_palindrome(char* buffer, int len)
 is_palindrome:
     push ebp
     mov ebp, esp
-    push ebx
     push esi
     push edi
+    push ebx
 
-    ; [ebp + 8]  is the first argument (buffer address)
-    ; [ebp + 12] is the second argument (length)
-    mov esi, [ebp + 8]  
-    mov ecx, [ebp + 12] 
+    mov esi, [ebp + 8] ; esi is the starting letter address
+    mov ecx, [ebp + 12] ; input length
+    
+    ; Make edi the ending letter address
+    mov edi, esi
+    add edi, ecx
+    dec edi
 
-    ; We will build this part next! 
-    ; For now, we "hardcode" a success return value.
-    mov eax, 1          
+    ; Set number of loops to input length / 2
+    mov eax, ecx
+    mov edx, 0
+    mov ebx, 2
+    div ebx
+    mov ecx, eax
 
-    pop edi             ; Restore registers in reverse order
-    pop esi
+.compare_loop:
+    test ecx, ecx
+    jz .true_exit
+
+    mov al, [esi] ; Starting letter
+    mov dl, [edi] ; Ending letter
+    cmp al, dl
+    jne .false_exit
+
+    inc esi ; Starting index++
+    dec edi ; Ending index--
+    dec ecx ; i--
+    jmp .compare_loop
+
+.false_exit:
+    mov eax, 0
+    jmp .finish
+
+.true_exit:
+    mov eax, 1
+
+.finish:
     pop ebx
-    mov esp, ebp        ; Reset stack pointer to base pointer
-    pop ebp             ; Restore caller's base pointer
-    ret                 ; Return to caller
+    pop edi
+    pop esi
+    mov esp, ebp
+    pop ebp
+    ret
