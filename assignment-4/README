@@ -1,0 +1,3 @@
+Compile NASM using nasm -g -f elf32 -F dwarf -o ./assignment-4/functions.o ./assignment-4/functions.asm
+Compile using gcc -g -Wall -static -m32 -o ./assignment-4/backandforth ./assignment-4/backandforth.c ./assignment-4/functions.o
+run ./assignment-4/backandforth
